@@ -59,12 +59,12 @@ func All(options ...Options) martini.Handler {
 
 func prepareOptions(options []Options) Options {
 	var opt Options
-        if len(options) > 0 {
-                opt = options[0]
-        }
-        if !isCompressionLevelValid(opt.CompressionLevel) {
-                opt.CompressionLevel = DefaultCompression
-        }
+	if len(options) > 0 {
+		opt = options[0]
+	}
+	if !isCompressionLevelValid(opt.CompressionLevel) {
+		opt.CompressionLevel = DefaultCompression
+	}
 	return opt
 }
 
@@ -88,7 +88,9 @@ func (grw gzipResponseWriter) Write(p []byte) (int, error) {
 	if len(grw.Header().Get(HeaderContentType)) == 0 {
 		grw.Header().Set(HeaderContentType, http.DetectContentType(p))
 	}
-
+	// removing content length before writing in case gzip.Writer writes to the
+	// underlying http.ResponseWriter before closing. See notes in compress/gzip.
+	grw.Header().Del("Content-Length")
 	return grw.w.Write(p)
 }
 
