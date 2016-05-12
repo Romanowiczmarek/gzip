@@ -84,6 +84,11 @@ type gzipResponseWriter struct {
 	martini.ResponseWriter
 }
 
+func (grw gzipResponseWriter) WriteHeader(a int) {
+	grw.Header().Del("Content-Length")
+	grw.ResponseWriter.WriteHeader(a)
+}
+
 func (grw gzipResponseWriter) Write(p []byte) (int, error) {
 	if len(grw.Header().Get(HeaderContentType)) == 0 {
 		grw.Header().Set(HeaderContentType, http.DetectContentType(p))
